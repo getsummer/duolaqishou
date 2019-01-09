@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+    <link href="css/common.css" rel="stylesheet"/>
+		<style type="text/css">
+			body,.mui-content{
+			  	background-color: #333;
+			  	color:#fff;
+			  }
+			  .title{
+			  	margin: 35px 15px 10px;
+			  }
+			  .title+.content{
+			  	margin: 10px 15px 35px;
+			  	color: #bbb;
+			  	text-indent: 1em;
+			  	font-size: 14px;
+			  	line-height: 24px;
+			  }
+			  .mui-table-view{
+			  	margin-bottom: 35px;
+			  }
+		</style>
+	</head>
+
+	<body>
+		<div class="mui-content">
+			<div class="content" style="text-align: center; padding: 20px 0;">
+				<img src="images/avatar_ps.png" width="70px" height="70px" />
+				<p><span id="account">帐号名称</span></p>
+			</div>
+			<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted" style="color: #ddd;">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" open-type="waitorder" href="javascript:;">
+						代接订单
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" open-type="getmyorder" href="javascript:;">
+						我的订单
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" open-type="getoverorder" href="javascript:;">
+						已完成订单
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" open-type="setting" href="javascript:;">
+						设置
+					</a>
+				</li>
+			</ul>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			var aniShow = "slide-in-right";
+			var userInfo = {};
+			//关于backbutton和menubutton两个按键的说明，在iOS平台不存在，故需隐藏
+			if(!mui.os.android){
+				var span = document.getElementById("android-only")
+				if(span){
+					span.style.display = "none";
+				}
+				aniShow = "pop-in";
+			}
+			var template=null,index=null;
+			mui.plusReady(function () {
+				//获得主页面webview引用；
+				index = plus.webview.currentWebview().opener();
+				
+				
+				
+			});
+			
+			function init(){
+				userInfo = eval( "(" + localStorage.getItem("userInfo") + ")");
+				console.log(JSON.stringify(userInfo));
+				
+				document.getElementById("account").innerHTML = userInfo.username;
+			}
+			
+			
+			mui('.mui-table-view').on('tap', 'a', function() {
+				close();
+				
+				var href = this.getAttribute("href");
+				var type = this.getAttribute("open-type");
+				
+				if("setting" == type){
+					
+					
+mui.openWindow({
+    url:"setting.html",
+    id:"setting.html",
+});
+					
+					
+					
+					return;
+				}
+				
+				
+				mainView = plus.webview.getWebviewById("main");
+					
+				var title = this.innerText;
+				//通知模板修改标题，并显示隐藏右上角图标；
+				mui.fire(mainView,'updateHeader',{title:title});
+				
+				mui.fire(mainView,'updateType',{type:type});
+			});
+			
+			/**
+			 * 关闭侧滑菜单
+			 */
+			function close() {
+				mui.fire(mui.currentWebview.opener(),"menu:close");
+			}
+			
+			//点击“关闭侧滑菜单”按钮处理逻辑
+			document.getElementById("close-btn").addEventListener("tap",close);
+			//在android4.4.2中的swipe事件，需要preventDefault一下，否则触发不正常
+			window.addEventListener('dragstart',function(e){
+				mui.gestures.touch.lockDirection = true; //锁定方向
+				mui.gestures.touch.startDirection = e.detail.direction;
+			});
+			window.addEventListener('dragleft', function(e) {
+				if(!mui.isScrolling){
+					e.detail.gesture.preventDefault();	
+				}
+			});
+			//监听左滑事件，若菜单已展开，左滑要关闭菜单；
+			window.addEventListener("swipeleft",function (e) {
+				if(Math.abs(e.detail.angle)>170){
+					close();						
+				}
+			});
+		</script>
+	</body>
+
+</html>

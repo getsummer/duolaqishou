@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/app.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link href="css/common.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="mui-bar mui-bar-nav">
+	<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+	<h1 class="mui-title">订单详情</h1>
+</header>
+
+<div class="mui-content"> 
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell">
+			订单号： <span id="dno"></span>
+		</li>
+		<li class="mui-table-view-cell">
+			订单状态： <span id="orstatus"></span>
+		</li>
+		<li class="mui-table-view-cell">
+			是否支付： <span id="showpaytyepname" style=" color: red;"></span><span id="showpaydo" style=" color: red;"></span>
+		</li>
+		<li class="mui-table-view-cell">
+			配送时间： <span id="posttime" style=" color: red;"></span>
+		</li>
+		<li class="mui-table-view-cell">
+			总价： <span id="allcost" style=" color: red;">0.00</span> 元
+		</li>
+	</ul>
+	<ul class="mui-table-view" style="margin-top: 10px;">
+		<li class="mui-table-view-cell">
+			商家信息
+		</li>
+		<li class="mui-table-view-cell" style="height: 105px; display: -webkit-box; -webkit-box-orient: horizontal;">
+			<div style="-webkit-box-flex: 1; line-height: 1.3em;">
+				<p style="color: #333;" id="shopname"></p>
+				<p>商家电话：<span id="shopphone"></span></p>
+				<p id="shopaddress"></p>
+				<p><i class="mui-icon mui-icon-location" style="font-size: 1.2em;"></i> <span>0米</span></p>
+			</div>
+			<div style=" width: 50px; line-height: 90px; text-align: center; border-left: 1px solid #ccc;">
+				<i id="call_shop" class="mui-icon mui-icon-phone"></i>
+			</div>
+		</li>
+	</ul>
+	<ul class="mui-table-view" style="margin-top: 10px;">
+		<li class="mui-table-view-cell">
+			买家信息
+		</li>
+		<li class="mui-table-view-cell" style="height: 105px; display: -webkit-box; -webkit-box-orient: horizontal;">
+			<div style="-webkit-box-flex: 1; line-height: 1.3em;">
+				<p style="color: #333;"></p>
+				<p>买家电话：<span id="buyerphone"></span></p>
+				<p id="buyeraddress"></p>
+				<p><i class="mui-icon mui-icon-location" style="font-size: 1.2em;"></i> 0米</p>
+			</div>
+			<div style=" width: 50px; line-height: 90px; text-align: center; border-left: 1px solid #ccc;">
+				<i id="call_buyer" class="mui-icon mui-icon-phone"></i>
+			</div>
+		</li>
+	</ul>
+	<ul id="dets" class="mui-table-view" style="margin-top: 10px;">
+		<li class="mui-table-view-cell">
+			菜单详情
+			<div id="cost" style="float: right; color: red;"></div>
+		</li>
+		<li class="mui-table-view-cell" style="color: gray;">
+			<div style="float:left; width: 20%;">
+				备注:
+			</div>
+			<div style="float:left; width: 80%;">
+				
+			</div>
+		</li>
+	</ul>
+	<button id="submitBtn" class="mui-btn mui-btn-block mui-btn-green" style="margin-top: 10px;">
+	</button>
+</div>
+
+    <script type="text/javascript" charset="utf-8">
+    		var detail = null;
+	    mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		
+		function loadData(){
+			
+      		app.details({"id":$_GET['id']},function(data){
+      			hideWaiting();
+      			
+				if( data.error == true ){
+					plus.nativeUI.toast(data.msg);
+				}else{
+					detail = data.msg;
+					
+					document.getElementById("submitBtn").innerText = detail.showstatus;
+					
+					document.getElementById("dno").innerHTML = detail.dno;
+					document.getElementById("orstatus").innerHTML = detail.orderstatus;
+					document.getElementById("showpaytyepname").innerHTML = detail.paytype;
+					document.getElementById("posttime").innerHTML = detail.postyear + " " + detail.postdate;
+					document.getElementById("showpaydo").innerHTML = "("+detail.paystatusname+")";
+					document.getElementById("allcost").innerHTML = detail.allcost;
+					
+					
+					document.getElementById("shopname").innerHTML = detail.shopname;
+					document.getElementById("shopphone").innerHTML = detail.shopphone;
+					document.getElementById("shopaddress").innerHTML = detail.shopaddress;
+					
+					document.getElementById("shopname").innerHTML = detail.shopname;
+					document.getElementById("buyerphone").innerHTML = detail.buyerphone;
+					
+					document.getElementById("buyeraddress").innerHTML = detail.buyeraddress;
+					
+					document.getElementById("cost").innerHTML = "总价￥"+detail.allcost+"元"
+					
+					mui.each(detail.det, function(index, item){
+						var html = "";
+						
+
+						html += '<li class="mui-table-view-cell" style="color: gray; font-size: 1.0em;">';
+						html += '	<div style="float:left; width: 50%;">';
+						html += item.goodsname;
+						html += '	</div>';
+						html += '	<div style="float:left; width: 10%;">';
+						html += item.goodscount+'份';
+						html += '	</div>';
+						html += '	<div style="float:left; width: 40%; text-align: right;">';
+						html += '		￥'+item.goodscost+'元/份';
+						html += '	</div>';
+						html += '</li>';
+						
+						document.getElementById("dets").innerHTML += html;
+					})
+					
+					var showstatus = "不可操作";
+					switch( parseInt( detail.status) ){
+						case 0:
+						showstatus = "立即抢单";
+						break;
+						case 1:
+						showstatus = "我已取货";
+						break;
+						case 2:
+						showstatus = "我已送达";
+						break;
+						default:
+						document.getElementById("submitBtn").style.backgroundColor = "#BBBBBB";
+						document.getElementById("submitBtn").style.borderColor = "#BBBBBB";
+					}
+					
+					document.getElementById("submitBtn").innerText = showstatus;
+      			}
+      		});
+		}
+		
+		
+		
+      	mui.plusReady(function(){
+      		showWaiting();
+      		
+      		loadData();
+      	});
+      	
+      	document.getElementById("call_shop").onclick = function(){
+      		plus.device.dial( detail.shopphone, true );
+      	};
+      	
+      	document.getElementById("call_buyer").onclick = function(){
+      		plus.device.dial( detail.buyerphone, true );
+      	};
+      	
+		document.getElementById("submitBtn").onclick =  function(){
+      		var dotype = "";
+			switch( parseInt( detail.status) ){
+      			case 0://待抢单
+	      			dotype = "joinorder";
+	      			break;
+      			case 1://待取货
+	      			dotype = "pickorder";
+	      			break;
+      			case 2:
+	      			dotype = "sendorder";
+	      			break;
+      			default:
+      				return;
+      		}
+      		
+      		
+      		showWaiting();
+      		app.ordercontrol({"dotype":dotype,"id":$_GET['id']},function(data){
+      			hideWaiting();
+				if( data.error == true ){
+					plus.nativeUI.toast(data.msg);
+				}else{
+					loadData();
+					plus.nativeUI.toast(data.msg);
+				}
+			});
+		}
+		
+    </script>
+</body>
+</html>
